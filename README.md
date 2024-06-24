@@ -18,8 +18,8 @@ This repository contains the backend code for the Burgher Social Feed applicatio
 
 1. Clone the repository:
    ```sh
-  git clone https://github.com/burgher-social/feed.git
-  cd feed
+    git clone https://github.com/burgher-social/feed.git
+    cd feed
    ```
 2. Build the Docker containers:
   ```sh
