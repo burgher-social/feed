@@ -17,8 +17,15 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	userresp, notcreated := create(
-		User{Id: Utils.GenerateId(), UserName: user.UserName, Name: user.Name, Tag: user.Tag})
+	userresp, accessToken, refreshToken, notcreated :=
+		create(
+			User{
+				Id:       Utils.GenerateId(),
+				UserName: user.UserName,
+				Name:     user.Name,
+				Tag:      user.Tag,
+				Email:    user.Email,
+			})
 	if notcreated != nil {
 		w.WriteHeader(503)
 		fmt.Println(notcreated)
@@ -27,7 +34,18 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(UserResponse{Id: userresp.Id, Name: userresp.Name, UserName: userresp.UserName, Tag: userresp.Tag, IsVerified: userresp.IsVerified})
+	json.
+		NewEncoder(w).
+		Encode(UserResponse{
+			Id:           userresp.Id,
+			Name:         userresp.Name,
+			UserName:     userresp.UserName,
+			Tag:          userresp.Tag,
+			IsVerified:   userresp.IsVerified,
+			Email:        userresp.Email,
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		})
 }
 
 func readHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,5 +72,14 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(UserResponse{Id: userresp.Id, Name: userresp.Name, UserName: userresp.UserName, Tag: userresp.Tag, IsVerified: userresp.IsVerified})
+	json.
+		NewEncoder(w).
+		Encode(
+			UserResponse{
+				Id:         userresp.Id,
+				Name:       userresp.Name,
+				UserName:   userresp.UserName,
+				Tag:        userresp.Tag,
+				IsVerified: userresp.IsVerified,
+			})
 }

@@ -13,6 +13,7 @@ type User struct {
 	UserName   string
 	Tag        int
 	IsVerified bool
+	Email      string
 }
 
 func init() {
@@ -23,12 +24,16 @@ type UserRequest struct {
 	Name     string `json:"name"`
 	UserName string `json:"username"`
 	Tag      int    `json:"tag"`
+	Email    string `json:"email"`
 }
 
 type UserResponse struct {
-	Id         string `json:"id"`
-	Name       string `json:"name"`
-	UserName   string `json:"username"`
-	Tag        int    `json:"tag"`
-	IsVerified bool   `json:"isVerified"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	UserName     string `json:"username"`
+	Tag          int    `json:"tag"`
+	IsVerified   bool   `json:"isVerified"`
+	Email        string `json:"email"`
+	RefreshToken string `json:"refreshToken"`
+	AccessToken  string `json:"accessToken"`
 }
