@@ -36,16 +36,18 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	json.
 		NewEncoder(w).
-		Encode(UserResponse{
-			Id:           userresp.Id,
-			Name:         userresp.Name,
-			UserName:     userresp.UserName,
-			Tag:          userresp.Tag,
-			IsVerified:   userresp.IsVerified,
-			Email:        userresp.Email,
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
-		})
+		Encode(
+			UserResponse{
+				Id:           userresp.Id,
+				Name:         userresp.Name,
+				UserName:     userresp.UserName,
+				Tag:          userresp.Tag,
+				IsVerified:   userresp.IsVerified,
+				Email:        userresp.Email,
+				AccessToken:  &accessToken,
+				RefreshToken: &refreshToken,
+			},
+		)
 }
 
 func readHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,4 +84,43 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 				Tag:        userresp.Tag,
 				IsVerified: userresp.IsVerified,
 			})
+}
+func readWithEmailHandler(w http.ResponseWriter, r *http.Request) {
+	type ReadRequest struct {
+		Email string `json:"email"`
+	}
+	var readRequest ReadRequest
+	// io.Copy(os.Stdout, r.Body)
+	err := json.NewDecoder(r.Body).Decode(&readRequest)
+	fmt.Println(readRequest)
+	if err != nil {
+		// return HTTP 400 bad request
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	userresp, accessToken, refreshToken, _ := readWithEmail(readRequest.Email)
+
+	// if notfound != nil {
+	// 	w.WriteHeader(503)
+	// 	fmt.Println(notfound)
+	// 	w.Write([]byte(notfound.Error()))
+	// 	return
+	// }
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.
+		NewEncoder(w).
+		Encode(
+			UserResponse{
+				Id:           userresp.Id,
+				Name:         userresp.Name,
+				UserName:     userresp.UserName,
+				Tag:          userresp.Tag,
+				IsVerified:   userresp.IsVerified,
+				AccessToken:  accessToken,
+				RefreshToken: refreshToken,
+			},
+		)
 }

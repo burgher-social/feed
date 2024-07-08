@@ -12,6 +12,7 @@ import (
 	Feed "burgher/Feed"
 	Location "burgher/Location"
 	Post "burgher/Post"
+	Token "burgher/Token"
 	Topic "burgher/Topic"
 	User "burgher/User"
 )
@@ -28,6 +29,7 @@ func main() {
 	router.PathPrefix("/location").Handler(Location.RegisterRouters())
 	router.PathPrefix("/topic").Handler(Topic.RegisterRouters())
 	router.PathPrefix("/feed").Handler(Feed.RegisterRouters())
+	router.PathPrefix("/token").Handler(Token.RegisterRouters())
 	handler := cors.Default().Handler(router)
 	if err := http.ListenAndServe(":8080", handler); err != nil {
 		fmt.Println("Error while starting server")

@@ -27,6 +27,7 @@ func RegisterRouters() http.Handler {
 	// r.Use(logMW)
 	r.HandleFunc("/user/create", createHandler).Methods("Post")
 	r.HandleFunc("/user/read", authHandler(readHandler)).Methods("Post", "Get")
+	r.HandleFunc("/user/read/email", readWithEmailHandler).Methods("Post", "Get")
 	// r.HandleFunc("/user/read", authHandler(readHandler)).Methods("Post", "Get").Subrouter().Use(logMW) // Specific route middleware handler
 	return r
 }

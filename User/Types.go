@@ -28,12 +28,12 @@ type UserRequest struct {
 }
 
 type UserResponse struct {
-	Id           string `json:"id"`
-	Name         string `json:"name"`
-	UserName     string `json:"username"`
-	Tag          int    `json:"tag"`
-	IsVerified   bool   `json:"isVerified"`
-	Email        string `json:"email"`
-	RefreshToken string `json:"refreshToken"`
-	AccessToken  string `json:"accessToken"`
+	Id           string  `json:"id"`
+	Name         string  `json:"name"`
+	UserName     string  `json:"username"`
+	Tag          int     `json:"tag"`
+	IsVerified   bool    `json:"isVerified"`
+	Email        string  `json:"email"`
+	RefreshToken *string `json:"refreshToken"`
+	AccessToken  *string `json:"accessToken"`
 }

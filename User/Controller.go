@@ -3,9 +3,10 @@ package User
 import (
 	"fmt"
 	"os"
-	"time"
 
 	DB "burgher/Storage/PSQL"
+
+	Token "burgher/Token"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -34,17 +35,7 @@ func create(user User) (User, string, string, error) {
 	fmt.Println(user)
 
 	DB.Connect().Create(&user)
-	now := time.Now()
-	accessToken, _ := createToken(map[string]interface{}{
-		"iat": now.Unix(),
-		"exp": now.Add(time.Hour).Unix(),
-		"id":  user.Id,
-	})
-	refreshToken, _ := createToken(map[string]interface{}{
-		"iat": now.Unix(),
-		"exp": now.Add(time.Hour * 24 * 60).Unix(),
-		"id":  user.Id,
-	})
+	accessToken, refreshToken := Token.GenerateTokens(user.Id)
 	return user, accessToken, refreshToken, nil
 }
 
@@ -53,4 +44,16 @@ func read(username string, tag int) (User, error) {
 	DB.Connect().First(&user, "user_name = ? and tag = ?", username, tag)
 
 	return user, nil
+}
+
+func readWithEmail(email string) (User, *string, *string, error) {
+	var user User
+	err := DB.Connect().First(&user, "email = ?", email)
+	var accessToken, refreshToken *string = nil, nil
+	if err.Error == nil {
+		accessToken3, refreshToken4 := Token.GenerateTokens(user.Id)
+		accessToken = &accessToken3
+		refreshToken = &refreshToken4
+	}
+	return user, accessToken, refreshToken, err.Error
 }
