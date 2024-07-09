@@ -10,6 +10,10 @@ import (
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	var post PostRequest
 	err := json.NewDecoder(r.Body).Decode(&post)
+	ctx := r.Context()
+	userId := ctx.Value(Utils.ContextUserKey)
+	post.UserId = userId.(string)
+
 	fmt.Println(post)
 	if err != nil {
 		// return HTTP 400 bad request

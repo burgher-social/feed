@@ -1,7 +1,7 @@
 package Token
 
 import (
-	DB "burgher/Storage/PSQL"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -11,38 +11,36 @@ import (
 
 var secretKey = []byte(string(os.Getenv("JWT_SIGNING")))
 
-func TokenRefresh(refreshToken string) (error, string, string) {
-	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	})
-
-	var tokenObj Token
-	DB.Connect().Create(&tokenObj)
+func TokenRefresh(refreshToken string) (string, string, error) {
+	tokn, err := GetTokenClaims(refreshToken)
 
 	if err != nil {
-		return err, "", ""
+		return "", "", err
 	}
 
-	if !token.Valid {
-		fmt.Println("invalid token")
-		return fmt.Errorf("invalid token"), "", ""
-	}
-	accessToken, refreshTokenNew := GenerateTokens(tokenObj.UserId)
-	return nil, accessToken, refreshTokenNew
+	accessToken, refreshTokenNew := GenerateTokens(tokn.UserId)
+	return accessToken, refreshTokenNew, nil
 }
 
 func GenerateTokens(userId string) (string, string) {
 	now := time.Now()
-	accessToken, _ := createToken(map[string]interface{}{
-		"iat": now.Unix(),
-		"exp": now.Add(time.Hour).Unix(),
-		"id":  userId,
-	})
-	refreshToken, _ := createToken(map[string]interface{}{
-		"iat": now.Unix(),
-		"exp": now.Add(time.Hour * 24 * 60).Unix(),
-		"id":  userId,
-	})
+	claims := TokenClaims{
+		Iat:    now.Unix(),
+		Exp:    now.Add(time.Hour).Unix(),
+		UserId: userId,
+	}
+	claimsRefresh := TokenClaims{
+		Iat:    now.Unix(),
+		Exp:    now.Add(time.Hour * 24 * 60).Unix(),
+		UserId: userId,
+	}
+	var myMap map[string]interface{}
+	data, _ := json.Marshal(claims)
+	json.Unmarshal(data, &myMap)
+	accessToken, _ := createToken(myMap)
+	data2, _ := json.Marshal(claimsRefresh)
+	json.Unmarshal(data2, &myMap)
+	refreshToken, _ := createToken(myMap)
 
 	return accessToken, refreshToken
 }
@@ -59,11 +57,32 @@ func createToken(mp map[string]interface{}) (string, error) {
 	return tokenString, nil
 }
 
-func getNewToken(refreshToken string) (error, TokenResponse) {
-	err, accessToken, newRefreshToken := TokenRefresh(refreshToken)
+func getNewToken(refreshToken string) (TokenResponse, error) {
+	accessToken, newRefreshToken, err := TokenRefresh(refreshToken)
 
 	var tok TokenResponse
 	tok.AccessToken = accessToken
 	tok.RefreshToken = newRefreshToken
-	return err, tok
+	return tok, err
+}
+
+func GetTokenClaims(tok string) (*TokenClaims, error) {
+	now := time.Now().Unix()
+	var tokenObj TokenClaims
+	token, err := jwt.ParseWithClaims(tok, &tokenObj, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if now > tokenObj.Exp {
+		return nil, fmt.Errorf("expired token")
+	}
+
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+	return &tokenObj, nil
 }

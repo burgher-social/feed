@@ -19,7 +19,7 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	err2, tokenResponse := getNewToken(readRequest.RefreshToken)
+	tokenResponse, err2 := getNewToken(readRequest.RefreshToken)
 	if err2 != nil {
 		// return HTTP 400 bad request
 		w.WriteHeader(400)
