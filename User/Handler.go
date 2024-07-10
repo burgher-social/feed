@@ -124,3 +124,22 @@ func readWithEmailHandler(w http.ResponseWriter, r *http.Request) {
 			},
 		)
 }
+
+func imageHandler(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(Utils.ContextUserKey)
+	file, _, err := r.FormFile("profile_picture")
+	if err != nil {
+		// If there is an error that means form is empty. Return nil for err in order
+		// to validate result as required.
+		return
+	}
+
+	defer file.Close()
+	updateProfilePicture(userId.(string), &file)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.
+		NewEncoder(w).
+		Encode(map[string]string{"status": "success"})
+}

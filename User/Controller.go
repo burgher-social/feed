@@ -1,14 +1,20 @@
 package User
 
 import (
+	"encoding/base64"
 	"fmt"
+	"io"
+	"log"
+	"mime/multipart"
 	"os"
 
 	DB "burgher/Storage/PSQL"
+	Utils "burgher/Utils"
 
 	Token "burgher/Token"
 
 	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/gorm/clause"
 )
 
 var secretKey = []byte(string(os.Getenv("JWT_SIGNING")))
@@ -46,6 +52,7 @@ func read(username string, tag int) (User, error) {
 	return user, nil
 }
 
+// Used to read user with email. It returns tokens so only use when needs to authenticate.
 func readWithEmail(email string) (User, *string, *string, error) {
 	var user User
 	err := DB.Connect().First(&user, "email = ?", email)
@@ -56,4 +63,28 @@ func readWithEmail(email string) (User, *string, *string, error) {
 		refreshToken = &refreshToken4
 	}
 	return user, accessToken, refreshToken, err.Error
+}
+
+func updateProfilePicture(userId string, file *multipart.File) {
+	data, err := io.ReadAll(*file)
+	if err != nil {
+		log.Println(err)
+		return
+		// return "", "", err
+	}
+
+	// contentType := http.DetectContentType(data)
+	imgBase64Str := base64.StdEncoding.EncodeToString(data)
+	imageobj := UserImage{
+		Id:     Utils.GenerateId(),
+		UserId: userId,
+		Image:  imgBase64Str,
+	}
+
+	DB.Connect().Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "user_id"}},
+		DoUpdates: clause.Assignments(map[string]interface{}{
+			"image": imgBase64Str,
+		}),
+	}).Create(&imageobj)
 }

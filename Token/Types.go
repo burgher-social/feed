@@ -9,7 +9,6 @@ import (
 
 type Token struct {
 	gorm.Model
-	jwt.RegisteredClaims
 	UserId       string `json:"userId"`
 	RefreshToken string `json:"refreshToken"`
 }

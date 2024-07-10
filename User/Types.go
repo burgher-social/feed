@@ -16,8 +16,16 @@ type User struct {
 	Email      string
 }
 
+type UserImage struct {
+	gorm.Model
+	Id     string
+	UserId string `gorm:"unique;not null"`
+	Image  string
+}
+
 func init() {
 	DB.Connect().AutoMigrate(&User{})
+	DB.Connect().AutoMigrate(&UserImage{})
 }
 
 type UserRequest struct {

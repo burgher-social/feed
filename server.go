@@ -30,7 +30,14 @@ func main() {
 	router.PathPrefix("/topic").Handler(Topic.RegisterRouters())
 	router.PathPrefix("/feed").Handler(Feed.RegisterRouters())
 	router.PathPrefix("/token").Handler(Token.RegisterRouters())
-	handler := cors.Default().Handler(router)
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+		// Enable Debugging for testing, consider disabling in production
+		Debug: true,
+	})
+	handler := c.Handler(router)
 	if err := http.ListenAndServe(":8080", handler); err != nil {
 		fmt.Println("Error while starting server")
 	} else {

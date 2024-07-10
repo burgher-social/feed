@@ -12,6 +12,8 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&post)
 	ctx := r.Context()
 	userId := ctx.Value(Utils.ContextUserKey)
+	fmt.Println(userId)
+	fmt.Println("userId")
 	post.UserId = userId.(string)
 
 	fmt.Println(post)
