@@ -10,6 +10,9 @@ import (
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	var locationReq LocationRequest
 	err := json.NewDecoder(r.Body).Decode(&locationReq)
+	ctx := r.Context()
+	userId := ctx.Value(Utils.ContextUserKey)
+	locationReq.UserId = userId.(string)
 	fmt.Println(locationReq)
 	if err != nil {
 		// return HTTP 400 bad request

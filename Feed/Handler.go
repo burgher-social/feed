@@ -1,6 +1,7 @@
 package Feed
 
 import (
+	Utils "burgher/Utils"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,6 +15,9 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var readRequest ReadRequest
 	err := json.NewDecoder(r.Body).Decode(&readRequest)
+	ctx := r.Context()
+	userId := ctx.Value(Utils.ContextUserKey)
+	readRequest.UserId = userId.(string)
 	fmt.Println(readRequest)
 	if err != nil {
 		// return HTTP 400 bad request
