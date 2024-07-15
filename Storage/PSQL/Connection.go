@@ -3,6 +3,7 @@ package PSQL
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var dbinstance *gorm.DB
@@ -10,10 +11,10 @@ var dbinstance *gorm.DB
 func Connect() *gorm.DB {
 	if dbinstance == nil {
 		dsn := "host=localhost user=user password=password dbname=burgher port=5432 sslmode=disable TimeZone=Asia/Kolkata"
-		// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		// 	Logger: logger.Default.LogMode(logger.Info),
-		// })
-		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+		// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err != nil {
 			panic("failed to connect database")
 		}

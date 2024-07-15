@@ -4,6 +4,7 @@ import (
 	Location "burgher/Location"
 	DB "burgher/Storage/PSQL"
 	Utils "burgher/Utils"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -22,7 +23,7 @@ func create(userId string, loc Location.Location) {
 	// todo: check if feed generation is already in progress
 
 	var postlocations []Location.PostsLocation
-	if err := DB.Connect().Where("ST_DWithin(location, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ?)", loc.Longitude, loc.Latitude, radius).Order("score DESC").Limit(20000).Find(&postlocations).Error; err == nil {
+	if err := DB.Connect().Select("*", "ST_AsText(location) as location").Where("ST_DWithin(location, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ?)", loc.Longitude, loc.Latitude, radius).Order("score DESC").Limit(20000).Find(&postlocations).Error; err == nil {
 		var userFeeds []UserFeed
 		curTimestamp := time.Now().UnixNano() / 1e6
 		for i := 0; i < len(postlocations); i++ {
@@ -35,7 +36,7 @@ func create(userId string, loc Location.Location) {
 				Timestamp: curTimestamp,
 			})
 		}
-		DB.Connect().Where("userId = ?", userId).Delete(&UserFeed{})
+		DB.Connect().Where("user_id = ?", userId).Delete(&UserFeed{})
 		DB.Connect().Create(&userFeeds)
 	}
 	// Redis.GetInstance().GeoRadius(ctx, "users_posts_id", loc.Longitude, loc.Latitude, &radiusQuery).Result()
@@ -46,7 +47,16 @@ func create(userId string, loc Location.Location) {
 func read(userId string, offset int, limit int) ([]UserFeed, error) {
 	var userFeeds []UserFeed
 
-	DB.Connect().Where("userId = ?", userId).Order("score DESC").Offset(offset).Limit(limit).Find(&userFeeds)
+	DB.Connect().Where("user_id = ?", userId).Order("score DESC").Offset(offset).Limit(limit).Find(&userFeeds)
+	if len(userFeeds) == 0 {
+		if loc, err := Location.Read(userId); err == nil {
+			create(userId, loc)
+			DB.Connect().Where("user_id = ?", userId).Order("score DESC").Offset(offset).Limit(limit).Find(&userFeeds)
+			if len(userFeeds) == 0 {
+				return []UserFeed{}, nil
+			}
+		}
+	}
 	curTimestamp := time.Now().UnixNano() / 1e6
 	lastTimestamp := userFeeds[0].Timestamp
 
@@ -55,6 +65,7 @@ func read(userId string, offset int, limit int) ([]UserFeed, error) {
 			go create(userId, loc)
 		}
 	}
-
+	fmt.Println("USER POSTS")
+	fmt.Println(userFeeds)
 	return userFeeds, nil
 }
