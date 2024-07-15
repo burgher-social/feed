@@ -18,6 +18,7 @@ type Location struct {
 
 func init() {
 	DB.Connect().AutoMigrate(&Location{})
+	DB.Connect().AutoMigrate(&PostsLocation{})
 }
 
 type LocationRequest struct {
@@ -36,8 +37,9 @@ type LocationResponse struct {
 }
 
 type PostsLocation struct {
-	Id        string     `gorm:"type:string;primaryKey" json:"id"`
-	Timestamp int64      `gorm:"type:timestamp" json:"timestamp"`
-	Score     int        `gorm:"type:integer" json:"score"`
-	Location  geom.Point `gorm:"type:geometry(Point,4326)" json:"location"`
+	gorm.Model
+	Id        string      `gorm:"type:string;primaryKey" json:"id"`
+	Timestamp int64       `gorm:"type:bigint" json:"timestamp"`
+	Score     int         `gorm:"type:integer" json:"score"`
+	Location  *geom.Point `gorm:"type:GEOMETRY(Point,4326)" json:"location"`
 }

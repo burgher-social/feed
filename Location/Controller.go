@@ -1,13 +1,16 @@
 package Location
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"burgher/Post"
 	DB "burgher/Storage/PSQL"
 
 	"github.com/twpayne/go-geom"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -18,17 +21,27 @@ func create(location Location) (Location, error) {
 	if loc, err := Read(location.UserId); err == nil {
 		if posts, perr := Post.Read(loc.UserId); perr == nil {
 			for i := 0; i < len(posts); i++ {
-				DB.Connect().Delete(&PostsLocation{}, location.UserId+":"+posts[i].Id)
+				DB.Connect().Unscoped().Delete(&PostsLocation{}, "id = ?", location.UserId+":"+posts[i].Id)
 			}
 
+			pt := geom.NewPoint(geom.XY).MustSetCoords(geom.Coord{location.Longitude, location.Latitude}).SetSRID(4326)
+			// ewkbData, _ := ewkb.Marshal(pt)
+			// fmt.Println(pt)
 			for i := 0; i < len(posts); i++ {
 				postLocation := PostsLocation{
 					Id:        location.UserId + ":" + posts[i].Id,
 					Timestamp: time.Now().UnixNano() / 1e6,
-					Location:  *geom.NewPoint(geom.XY).MustSetCoords(geom.Coord{location.Longitude, location.Latitude}),
+					Location:  pt,
 					Score:     0,
 				}
-				DB.Connect().Create(&postLocation)
+				sqlStr := fmt.Sprint(`INSERT INTO "posts_locations" ("id","created_at","updated_at","deleted_at","timestamp","score","location") VALUES ('`, postLocation.Id, `', now(), now(), null, '`, strconv.FormatInt(postLocation.Timestamp, 10), `', '`, postLocation.Score, `', ST_GeomFromText('POINT(`, strconv.FormatFloat(location.Longitude, 'f', -1, 64), ` `, strconv.FormatFloat(location.Latitude, 'f', -1, 64), `)', 4326)) RETURNING "id";`)
+				// print(sqlStr)
+				tx := DB.Connect().Exec(sqlStr)
+				if tx.Error != nil {
+					fmt.Println(tx.Error)
+				}
+
+				// DB.Connect().Create(&postLocation)
 			}
 
 			// REDIS
@@ -63,6 +76,10 @@ func create(location Location) (Location, error) {
 
 func Read(userId string) (Location, error) {
 	var locations Location
-	DB.Connect().First(&locations, "user_id = ?", userId)
+	dbRresult := DB.Connect().First(&locations, "user_id = ?", userId)
+	if errors.Is(dbRresult.Error, gorm.ErrRecordNotFound) {
+		// fmt.Println("handling not found error")
+		return locations, fmt.Errorf("location doesn't exist")
+	}
 	return locations, nil
 }

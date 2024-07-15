@@ -35,7 +35,7 @@ func main() {
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
 		// Enable Debugging for testing, consider disabling in production
-		Debug: true,
+		Debug: false,
 	})
 	handler := c.Handler(router)
 	if err := http.ListenAndServe(":8080", handler); err != nil {
