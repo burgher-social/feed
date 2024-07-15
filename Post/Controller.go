@@ -38,8 +38,11 @@ func ReadOne(postId string) (PostInfo, error) {
 	fields := `posts.*, post_topics.topic_id as topic_id,
 		topics.name as topic_name`
 	res := []PostInfo{}
-	DB.Connect().Model(&post).Select(fields).Where("id = ?", postId).Joins("INNER JOIN post_topics on posts.id = post_topics.post_id").
-		Joins("INNER JOIN topics on post_topics.topic_id = topics.id").
+	DB.Connect().Model(&post).Select(fields).Where("posts.id = ?", postId).Joins("LEFT JOIN post_topics on posts.id = post_topics.post_id").
+		Joins("LEFT JOIN topics on topics.id = post_topics.topic_id").
 		Scan(&res)
+	if len(res) == 0 {
+		return PostInfo{}, fmt.Errorf("no post found")
+	}
 	return res[0], nil
 }

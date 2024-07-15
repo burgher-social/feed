@@ -41,7 +41,7 @@ type PostResponse struct {
 }
 
 type PostInfo struct {
-	Post        `gorm:"embedded"`
-	PostTopics  `gorm:"embedded;embeddedPrefix:post_topics_"`
-	Topic.Topic `gorm:"embedded;embeddedPrefix:topic_"`
+	PostResponse `gorm:"embedded" json:"post"`
+	PostTopics   `gorm:"embedded;embeddedPrefix:post_topics_" json:"postTopic"`
+	Topic.Topic  `gorm:"embedded;embeddedPrefix:topic_" json:"topic"`
 }

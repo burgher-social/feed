@@ -22,8 +22,8 @@ type TokenClaims struct {
 }
 
 type TokenResponse struct {
-	RefreshToken string
-	AccessToken  string
+	RefreshToken string `json:"refreshToken"`
+	AccessToken  string `json:"accessToken"`
 }
 
 func init() {

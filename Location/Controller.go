@@ -34,7 +34,17 @@ func create(location Location) (Location, error) {
 					Location:  &a,
 					Score:     0,
 				}
-				sqlStr := fmt.Sprint(`INSERT INTO "posts_locations" ("id","created_at","updated_at","deleted_at","timestamp","score","location") VALUES ('`, postLocation.Id, `', now(), now(), null, '`, strconv.FormatInt(postLocation.Timestamp, 10), `', '`, postLocation.Score, `', ST_GeomFromText('POINT(`, strconv.FormatFloat(location.Longitude, 'f', -1, 64), ` `, strconv.FormatFloat(location.Latitude, 'f', -1, 64), `)', 4326)) RETURNING "id";`)
+				sqlStr := fmt.Sprint(`INSERT INTO "posts_locations" 
+					("id","created_at","updated_at","deleted_at","timestamp","score","location")
+					VALUES 
+					('`, postLocation.Id, `', 
+					now(), 
+					now(), 
+					null,
+					'`, strconv.FormatInt(postLocation.Timestamp, 10), `',
+					'`, postLocation.Score, `',
+					ST_GeomFromText('POINT(`, strconv.FormatFloat(location.Longitude, 'f', -1, 64), ` `, strconv.FormatFloat(location.Latitude, 'f', -1, 64), `)', 4326)) ON CONFLICT (id) DO NOTHING
+					RETURNING "id";`)
 				// print(sqlStr)
 				tx := DB.Connect().Exec(sqlStr)
 				if tx.Error != nil {
