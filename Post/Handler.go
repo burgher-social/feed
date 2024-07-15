@@ -59,11 +59,11 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	resplist := []PostResponse{}
-	for _, p := range posts {
-		resplist = append(resplist, PostResponse{Id: p.Id, Content: p.Content, UserId: p.UserId, ParentId: p.ParentId})
-	}
-	json.NewEncoder(w).Encode(&resplist)
+	// resplist := []PostResponse{}
+	// for _, p := range posts {
+	// 	resplist = append(resplist, PostResponse{Id: p.Id, Content: p.Content, UserId: p.UserId, ParentId: p.ParentId})
+	// }
+	json.NewEncoder(w).Encode(&posts)
 }
 
 func readOneHandler(w http.ResponseWriter, r *http.Request) {

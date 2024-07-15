@@ -18,19 +18,22 @@ func create(post Post, topics []string) (Post, error) {
 	return post, nil
 }
 
-func Read(userId string) ([]Post, error) {
+func Read(userId string) ([]PostInfo, error) {
 	var posts []Post
 	DB.Connect().Where("user_id = ?", userId).Find(&posts)
 	fields := `posts.*, post_topics.topic_id as topic_id,
 		topics.name as topic_name`
 	res := []PostInfo{}
-	DB.Connect().Model(&posts).Select(fields).Where("user_id = ?", userId).Joins("INNER JOIN post_topics on posts.id = post_topics.post_id").
-		Joins("INNER JOIN topics on post_topics.topic_id = topics.id").
+	// DB.Connect().Model(&posts).Select(fields).Where("user_id = ?", userId).Joins("INNER JOIN post_topics on posts.id = post_topics.post_id").
+	// 	Joins("INNER JOIN topics on post_topics.topic_id = topics.id").
+	// 	Scan(&res)
+	DB.Connect().Model(&posts).Select(fields).Where("posts.user_id = ?", userId).Joins("LEFT JOIN post_topics on posts.id = post_topics.post_id").
+		Joins("LEFT JOIN topics on topics.id = post_topics.topic_id").
 		Scan(&res)
 
 	fmt.Println(res)
 	fmt.Printf("%+v\n", res)
-	return posts, nil
+	return res, nil
 }
 
 func ReadOne(postId string) (PostInfo, error) {

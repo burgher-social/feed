@@ -20,7 +20,7 @@ func create(location Location) (Location, error) {
 	if loc, err := Read(location.UserId); err == nil {
 		if posts, perr := Post.Read(loc.UserId); perr == nil {
 			for i := 0; i < len(posts); i++ {
-				DB.Connect().Unscoped().Delete(&PostsLocation{}, "id = ?", location.UserId+":"+posts[i].Id)
+				DB.Connect().Unscoped().Delete(&PostsLocation{}, "id = ?", location.UserId+":"+posts[i].PostResponse.Id)
 			}
 
 			// pt := geom.NewPoint(geom.XY).MustSetCoords(geom.Coord{location.Longitude, location.Latitude}).SetSRID(4326)
@@ -29,7 +29,7 @@ func create(location Location) (Location, error) {
 			a := "0101000020E6100000D02C6409C6675340DB02F85DC7E22940"
 			for i := 0; i < len(posts); i++ {
 				postLocation := PostsLocation{
-					Id:        location.UserId + ":" + posts[i].Id,
+					Id:        location.UserId + ":" + posts[i].PostResponse.Id,
 					Timestamp: time.Now().UnixNano() / 1e6,
 					Location:  &a,
 					Score:     0,
