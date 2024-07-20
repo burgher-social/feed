@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var minutes_45_in_miliseconds int64 = 45 * 60 * 1000
+var minutes_45_in_miliseconds int64 = 0 // 45 * 60 * 1000
 var radius int = 10000
 
 func create(userId string, loc Location.Location) {

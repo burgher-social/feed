@@ -95,3 +95,33 @@ func readOneHandler(w http.ResponseWriter, r *http.Request) {
 	// }
 	json.NewEncoder(w).Encode(&post)
 }
+
+func readCommentHandler(w http.ResponseWriter, r *http.Request) {
+	type ReadRequest struct {
+		PostId string `json:"postId"`
+	}
+	var readRequest ReadRequest
+	err := json.NewDecoder(r.Body).Decode(&readRequest)
+	fmt.Println(readRequest)
+	if err != nil {
+		// return HTTP 400 bad request
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	posts, notfound := readComments(readRequest.PostId)
+
+	if notfound != nil {
+		w.WriteHeader(503)
+		fmt.Println(notfound)
+		w.Write([]byte(notfound.Error()))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	// resplist := []PostResponse{}
+	// for _, p := range posts {
+	// 	resplist = append(resplist, PostResponse{Id: p.Id, Content: p.Content, UserId: p.UserId, ParentId: p.ParentId})
+	// }
+	json.NewEncoder(w).Encode(&posts)
+}
