@@ -12,7 +12,7 @@ import (
 func init() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("Error loading .env file: %s", err)
+		log.Printf("Error loading .env file: %s", err)
 	}
 	m := make(map[string]string)
 	for _, e := range os.Environ() {
