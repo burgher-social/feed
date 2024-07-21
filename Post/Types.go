@@ -3,6 +3,7 @@ package Post
 import (
 	DB "burgher/Storage/PSQL"
 	Topic "burgher/Topic"
+	"burgher/User"
 
 	"gorm.io/gorm"
 )
@@ -44,4 +45,5 @@ type PostInfo struct {
 	PostResponse `gorm:"embedded" json:"post"`
 	PostTopics   `gorm:"embedded;embeddedPrefix:post_topics_" json:"postTopic"`
 	Topic.Topic  `gorm:"embedded;embeddedPrefix:topic_" json:"topic"`
+	User.User    `gorm:"embedded;embeddedPrefix:user_" json:"user"`
 }

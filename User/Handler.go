@@ -25,7 +25,10 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 				Name:     user.Name,
 				Tag:      user.Tag,
 				Email:    user.Email,
-			})
+				ImageUrl: nil,
+			},
+			user.FirebaseAuthIdToken,
+		)
 	if notcreated != nil {
 		w.WriteHeader(503)
 		fmt.Println(notcreated)
@@ -44,8 +47,8 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 				Tag:          userresp.Tag,
 				IsVerified:   userresp.IsVerified,
 				Email:        userresp.Email,
-				AccessToken:  &accessToken,
-				RefreshToken: &refreshToken,
+				AccessToken:  accessToken,
+				RefreshToken: refreshToken,
 			},
 		)
 }
@@ -54,6 +57,7 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	type ReadRequest struct {
 		Username string `json:"username"`
 		Tag      int    `json:"tag"`
+		UserId   string `json:"userId"`
 	}
 	var readRequest ReadRequest
 	err := json.NewDecoder(r.Body).Decode(&readRequest)
@@ -64,7 +68,7 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	userresp, notfound := read(readRequest.Username, readRequest.Tag)
+	userresp, notfound := read(readRequest.Username, readRequest.Tag, readRequest.UserId)
 
 	if notfound != nil {
 		w.WriteHeader(503)
@@ -81,13 +85,20 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 				Id:         userresp.Id,
 				Name:       userresp.Name,
 				UserName:   userresp.UserName,
+				Email:      userresp.Email,
 				Tag:        userresp.Tag,
 				IsVerified: userresp.IsVerified,
+				ImageUrl:   userresp.ImageUrl,
 			})
 }
 func readWithEmailHandler(w http.ResponseWriter, r *http.Request) {
+	// reqDump, err2 := httputil.DumpRequest(r, true)
+	// fmt.Println(string(reqDump))
+	// fmt.Println(err2)
+
 	type ReadRequest struct {
-		Email string `json:"email"`
+		Email               string `json:"email"`
+		FirebaseAuthIdToken string `json:"firebaseAuthIdToken"`
 	}
 	var readRequest ReadRequest
 	// io.Copy(os.Stdout, r.Body)
@@ -99,7 +110,7 @@ func readWithEmailHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	userresp, accessToken, refreshToken, _ := readWithEmail(readRequest.Email)
+	userresp, accessToken, refreshToken, _ := readWithEmail(readRequest.Email, readRequest.FirebaseAuthIdToken)
 
 	// if notfound != nil {
 	// 	w.WriteHeader(503)
@@ -121,16 +132,27 @@ func readWithEmailHandler(w http.ResponseWriter, r *http.Request) {
 				IsVerified:   userresp.IsVerified,
 				AccessToken:  accessToken,
 				RefreshToken: refreshToken,
+				ImageUrl:     userresp.ImageUrl,
 			},
 		)
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(Utils.ContextUserKey)
-	file, _, err := r.FormFile("profile_picture")
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		fmt.Println(err)
+	}
+	// for k, v := range r.Form {
+	// if you are certain v[0] is present
+	// fmt.Println(k)
+	// fmt.Println(v)
+
+	// }
 	if err != nil {
 		// If there is an error that means form is empty. Return nil for err in order
 		// to validate result as required.
+		fmt.Println(err)
 		return
 	}
 

@@ -2,59 +2,76 @@ package User
 
 import (
 	"encoding/base64"
-	"fmt"
 	"io"
 	"log"
 	"mime/multipart"
-	"os"
 
 	DB "burgher/Storage/PSQL"
 	Utils "burgher/Utils"
 
 	Token "burgher/Token"
 
-	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm/clause"
 )
 
-var secretKey = []byte(string(os.Getenv("JWT_SIGNING")))
+// var secretKey = []byte(string(os.Getenv("JWT_SIGNING")))
 
-// fmt.Println(secretKey)
+// // fmt.Println(secretKey)
 
-func createToken(mp map[string]interface{}) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		jwt.MapClaims(mp))
-	// {
-	// 	"username": username,
-	// 	"exp":      time.Now().Add(time.Hour * 24).Unix(),
-	// })
+// func createToken(mp map[string]interface{}) (string, error) {
+// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+// 		jwt.MapClaims(mp))
+// 	// {
+// 	// 	"username": username,
+// 	// 	"exp":      time.Now().Add(time.Hour * 24).Unix(),
+// 	// })
 
-	tokenString, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
+// 	tokenString, err := token.SignedString(secretKey)
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	return tokenString, nil
+// }
+
+func create(user User, firebaseAuthIdToken string) (User, *string, *string, error) {
+	claims, errtok := Utils.VerifyToken(firebaseAuthIdToken, user.Email)
+	if errtok != nil {
+		return user, nil, nil, errtok
 	}
-
-	return tokenString, nil
-}
-
-func create(user User) (User, string, string, error) {
-	fmt.Println(user)
+	if (*claims)["picture"] == nil {
+		tempUrl := "https://miro.medium.com/v2/resize:fit:720/format:webp/1*EOOeLlRAPdk2k4krTI5HIg.png"
+		user.ImageUrl = &tempUrl
+	} else {
+		tempPicture := (*claims)["picture"].(string)
+		user.ImageUrl = &tempPicture
+	}
 
 	DB.Connect().Create(&user)
 	accessToken, refreshToken := Token.GenerateTokens(user.Id)
-	return user, accessToken, refreshToken, nil
+	return user, &accessToken, &refreshToken, nil
 }
 
-func read(username string, tag int) (User, error) {
+func read(username string, tag int, userId string) (User, error) {
 	var user User
-	DB.Connect().First(&user, "user_name = ? and tag = ?", username, tag)
+	if userId != "" {
+		DB.Connect().First(&user, "id = ?", userId)
+
+	} else {
+		DB.Connect().First(&user, "user_name = ? and tag = ?", username, tag)
+	}
 
 	return user, nil
 }
 
 // Used to read user with email. It returns tokens so only use when needs to authenticate.
-func readWithEmail(email string) (User, *string, *string, error) {
+func readWithEmail(email string, firebaseAuthIdToken string) (User, *string, *string, error) {
 	var user User
+	_, errtok := Utils.VerifyToken(firebaseAuthIdToken, email)
+	if errtok != nil {
+		return user, nil, nil, errtok
+	}
+
 	err := DB.Connect().First(&user, "email = ?", email)
 	var accessToken, refreshToken *string = nil, nil
 	if err.Error == nil {

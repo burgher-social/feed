@@ -10,10 +10,11 @@ type User struct {
 	gorm.Model
 	Id         string
 	Name       string
-	UserName   string
+	UserName   string `json:"username"`
 	Tag        int
 	IsVerified bool
 	Email      string
+	ImageUrl   *string `json:"imageUrl"`
 }
 
 type UserImage struct {
@@ -29,10 +30,11 @@ func init() {
 }
 
 type UserRequest struct {
-	Name     string `json:"name"`
-	UserName string `json:"username"`
-	Tag      int    `json:"tag"`
-	Email    string `json:"email"`
+	Name                string `json:"name"`
+	UserName            string `json:"username"`
+	Tag                 int    `json:"tag"`
+	Email               string `json:"email"`
+	FirebaseAuthIdToken string `json:"firebaseAuthIdToken"`
 }
 
 type UserResponse struct {
@@ -44,4 +46,5 @@ type UserResponse struct {
 	Email        string  `json:"email"`
 	RefreshToken *string `json:"refreshToken"`
 	AccessToken  *string `json:"accessToken"`
+	ImageUrl     *string `json:"imageUrl"`
 }
