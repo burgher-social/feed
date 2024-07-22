@@ -2,7 +2,12 @@ package Utils
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	"regexp"
+	"strings"
 
 	firebase "firebase.google.com/go/v4"
 
@@ -15,6 +20,37 @@ func initFirebase() (*firebase.App, error) {
 	if fbapp != nil {
 		return fbapp, nil
 	}
+
+	var firebaseconfig map[string]interface{}
+	jsonFile, err := os.ReadFile("./burgher-adminsdk-template.json")
+	// if we os.Open returns an error then handle it
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("Successfully Opened sdkfile.json")
+
+	// defer the closing of our jsonFile so that we can parse it later on
+	// defer jsonFile.Close()
+	// b, _ := jsonFile.Read()
+	if err := json.Unmarshal(jsonFile, &firebaseconfig); err != nil {
+		log.Fatal(err)
+	}
+	var re = regexp.MustCompile(`/\\n/g`)
+	fmt.Println(os.Getenv("FIREBASE_PVT_KEY"))
+	firebasepvtkey := re.ReplaceAllString(os.Getenv("FIREBASE_PVT_KEY"), `\n`)
+	// fmt.Println(firebasepvtkey)
+	firebasepvtkey = strings.Replace(firebasepvtkey, `\n`, "\n", -1)
+	firebaseconfig["private_key_id"] = os.Getenv("FIREBASE_PVT_KEY_ID")
+	firebaseconfig["private_key"] = firebasepvtkey
+	firebaseconfig["client_email"] = os.Getenv("FIREBASE_CLIENT_EMAIL")
+	firebaseconfig["client_id"] = os.Getenv("FIREBASE_CLIENT_ID")
+	firebaseconfig["client_x509_cert_url"] = os.Getenv("FIREBASE_CLIENT_X509CERT")
+	// jsonFile[]
+	// fmt.Println(firebaseconfig)
+	// fmt.Println(string(jsonFile))
+	bytefirebaseconfig, _ := json.Marshal(firebaseconfig)
+	_ = os.WriteFile("./burgher-adminsdk-firebase.json", bytefirebaseconfig, 0644)
+
 	opt := option.WithCredentialsFile("./burgher-adminsdk-firebase.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
@@ -24,6 +60,9 @@ func initFirebase() (*firebase.App, error) {
 	return app, nil
 }
 
+//	func init() {
+//		initFirebase()
+//	}
 func VerifyToken(idToken string, email string) (*map[string]interface{}, error) {
 	app, err := initFirebase()
 	if err != nil {
