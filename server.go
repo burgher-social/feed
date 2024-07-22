@@ -9,6 +9,7 @@ import (
 	"github.com/rs/cors"
 
 	Feed "burgher/Feed"
+	Insights "burgher/Insights"
 	Location "burgher/Location"
 	Post "burgher/Post"
 	Token "burgher/Token"
@@ -18,14 +19,6 @@ import (
 
 func main() {
 
-	// m := make(map[string]string)
-	// for _, e := range os.Environ() {
-	// 	if i := strings.Index(e, "="); i >= 0 {
-	// 		m[e[:i]] = e[i+1:]
-	// 	}
-	// }
-	// fmt.Println(m)
-
 	router := mux.NewRouter()
 	router.PathPrefix("/user").Handler(User.RegisterRouters())
 	router.PathPrefix("/post").Handler(Post.RegisterRouters())
@@ -33,6 +26,7 @@ func main() {
 	router.PathPrefix("/topic").Handler(Topic.RegisterRouters())
 	router.PathPrefix("/feed").Handler(Feed.RegisterRouters())
 	router.PathPrefix("/token").Handler(Token.RegisterRouters())
+	router.PathPrefix("/insights").Handler(Insights.RegisterRouters())
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedHeaders:   []string{"*"},

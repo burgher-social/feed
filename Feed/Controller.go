@@ -2,6 +2,7 @@ package Feed
 
 import (
 	Location "burgher/Location"
+	"burgher/Post"
 	DB "burgher/Storage/PSQL"
 	Utils "burgher/Utils"
 	"fmt"
@@ -22,7 +23,7 @@ func create(userId string, loc Location.Location) {
 
 	// todo: check if feed generation is already in progress
 
-	var postlocations []Location.PostsLocation
+	var postlocations []Post.PostsLocation
 	if err := DB.Connect().Select("*", "ST_AsText(location) as location").Where("ST_DWithin(location, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ?)", loc.Longitude, loc.Latitude, radius).Order("score DESC").Limit(20000).Find(&postlocations).Error; err == nil {
 		var userFeeds []UserFeed
 		curTimestamp := time.Now().UnixNano() / 1e6

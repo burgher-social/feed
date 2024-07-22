@@ -36,7 +36,7 @@ func initFirebase() (*firebase.App, error) {
 		log.Fatal(err)
 	}
 	var re = regexp.MustCompile(`/\\n/g`)
-	fmt.Println(os.Getenv("FIREBASE_PVT_KEY"))
+	// fmt.Println(os.Getenv("FIREBASE_PVT_KEY"))
 	firebasepvtkey := re.ReplaceAllString(os.Getenv("FIREBASE_PVT_KEY"), `\n`)
 	// fmt.Println(firebasepvtkey)
 	firebasepvtkey = strings.Replace(firebasepvtkey, `\n`, "\n", -1)

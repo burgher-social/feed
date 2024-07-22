@@ -17,7 +17,6 @@ type Location struct {
 
 func init() {
 	DB.Connect().AutoMigrate(&Location{})
-	DB.Connect().AutoMigrate(&PostsLocation{})
 }
 
 type LocationRequest struct {
@@ -35,13 +34,13 @@ type LocationResponse struct {
 	City      string  `json:"city"`
 }
 
-type PostsLocation struct {
-	gorm.Model
-	Id        string  `gorm:"type:string;primaryKey" json:"id"`
-	Timestamp int64   `gorm:"type:bigint" json:"timestamp"`
-	Score     int     `gorm:"type:integer" json:"score"`
-	Location  *string `gorm:"type:GEOMETRY(Point,4326)" json:"location"`
-}
+// type PostsLocation struct {
+// 	gorm.Model
+// 	Id        string  `gorm:"type:string;primaryKey" json:"id"`
+// 	Timestamp int64   `gorm:"type:bigint" json:"timestamp"`
+// 	Score     int     `gorm:"type:integer" json:"score"`
+// 	Location  *string `gorm:"type:GEOMETRY(Point,4326)" json:"location"`
+// }
 
 // func (p *PostsLocation) Scan(value interface{}) error {
 // 	fmt.Println("converting scan")
