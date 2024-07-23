@@ -24,9 +24,16 @@ type UserImage struct {
 	Image  string
 }
 
+type LikesPosts struct {
+	gorm.Model
+	UserId string `gorm:"index:u_user_id_post_id,unique" json:"userId"`
+	PostId string `gorm:"index:u_user_id_post_id,unique" json:"postId"`
+}
+
 func init() {
 	DB.Connect().AutoMigrate(&User{})
 	DB.Connect().AutoMigrate(&UserImage{})
+	DB.Connect().AutoMigrate(&LikesPosts{})
 }
 
 type UserRequest struct {

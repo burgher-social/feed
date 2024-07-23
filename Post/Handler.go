@@ -10,10 +10,7 @@ import (
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	var post PostRequest
 	err := json.NewDecoder(r.Body).Decode(&post)
-	ctx := r.Context()
-	userId := ctx.Value(Utils.ContextUserKey)
-	fmt.Println(userId)
-	fmt.Println("userId")
+	userId := r.Context().Value(Utils.ContextUserKey)
 	post.UserId = userId.(string)
 
 	fmt.Println(post)
@@ -42,14 +39,14 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var readRequest ReadRequest
 	err := json.NewDecoder(r.Body).Decode(&readRequest)
-	fmt.Println(readRequest)
+	userId := r.Context().Value(Utils.ContextUserKey).(string)
 	if err != nil {
 		// return HTTP 400 bad request
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	posts, notfound := Read(readRequest.UserId)
+	posts, notfound := Read(readRequest.UserId, userId)
 
 	if notfound != nil {
 		w.WriteHeader(503)
@@ -72,14 +69,14 @@ func readOneHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var readRequest ReadRequest
 	err := json.NewDecoder(r.Body).Decode(&readRequest)
-	fmt.Println(readRequest)
+	userId := r.Context().Value(Utils.ContextUserKey).(string)
 	if err != nil {
 		// return HTTP 400 bad request
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	post, notfound := ReadOne(readRequest.PostId)
+	post, notfound := ReadOne(readRequest.PostId, userId)
 
 	if notfound != nil {
 		w.WriteHeader(503)
@@ -89,10 +86,6 @@ func readOneHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	// resplist := []PostInfo{}
-	// for _, p := range post {
-	// 	resplist = append(resplist, PostResponse{Id: p.Id, Content: p.Content, UserId: p.UserId, ParentId: p.ParentId})
-	// }
 	json.NewEncoder(w).Encode(&post)
 }
 
@@ -102,14 +95,13 @@ func readCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var readRequest ReadRequest
 	err := json.NewDecoder(r.Body).Decode(&readRequest)
-	fmt.Println(readRequest)
+	userId := r.Context().Value(Utils.ContextUserKey).(string)
 	if err != nil {
-		// return HTTP 400 bad request
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	posts, notfound := readComments(readRequest.PostId)
+	posts, notfound := readComments(readRequest.PostId, userId)
 
 	if notfound != nil {
 		w.WriteHeader(503)
@@ -119,9 +111,5 @@ func readCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	// resplist := []PostResponse{}
-	// for _, p := range posts {
-	// 	resplist = append(resplist, PostResponse{Id: p.Id, Content: p.Content, UserId: p.UserId, ParentId: p.ParentId})
-	// }
 	json.NewEncoder(w).Encode(&posts)
 }

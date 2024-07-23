@@ -14,26 +14,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// var secretKey = []byte(string(os.Getenv("JWT_SIGNING")))
-
-// // fmt.Println(secretKey)
-
-// func createToken(mp map[string]interface{}) (string, error) {
-// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
-// 		jwt.MapClaims(mp))
-// 	// {
-// 	// 	"username": username,
-// 	// 	"exp":      time.Now().Add(time.Hour * 24).Unix(),
-// 	// })
-
-// 	tokenString, err := token.SignedString(secretKey)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	return tokenString, nil
-// }
-
 func create(user User, firebaseAuthIdToken string) (User, *string, *string, error) {
 	claims, errtok := Utils.VerifyToken(firebaseAuthIdToken, user.Email)
 	if errtok != nil {
@@ -87,10 +67,7 @@ func updateProfilePicture(userId string, file *multipart.File) {
 	if err != nil {
 		log.Println(err)
 		return
-		// return "", "", err
 	}
-
-	// contentType := http.DetectContentType(data)
 	imgBase64Str := base64.StdEncoding.EncodeToString(data)
 	imageobj := UserImage{
 		Id:     Utils.GenerateId(),

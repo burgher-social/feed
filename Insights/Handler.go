@@ -1,6 +1,7 @@
 package Insights
 
 import (
+	Utils "burgher/Utils"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -13,9 +14,7 @@ func likeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var likeReq LikeRequest
 	err := json.NewDecoder(r.Body).Decode(&likeReq)
-	// ctx := r.Context()
-	// userId := ctx.Value(Utils.ContextUserKey)
-	// locationReq.UserId = userId.(string)
+	userId := r.Context().Value(Utils.ContextUserKey).(string)
 	// fmt.Println(locationReq)
 	if err != nil {
 		// return HTTP 400 bad request
@@ -23,7 +22,14 @@ func likeHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	err2 := Like(likeReq.Count, likeReq.PostId)
+
+	var err2 error
+	if likeReq.Count > 0 {
+		err2 = Like(likeReq.Count, likeReq.PostId, userId)
+	} else {
+		err2 = UnLike(likeReq.Count, likeReq.PostId, userId)
+	}
+
 	if err2 != nil {
 		w.WriteHeader(503)
 		fmt.Println(err)

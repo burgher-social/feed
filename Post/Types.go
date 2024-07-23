@@ -27,7 +27,6 @@ func init() {
 	DB.Connect().AutoMigrate(&Post{})
 	DB.Connect().AutoMigrate(&PostTopics{})
 	DB.Connect().AutoMigrate(&PostsLocation{})
-
 }
 
 type PostRequest struct {
@@ -51,6 +50,7 @@ type PostInfo struct {
 	User.User         `gorm:"embedded;embeddedPrefix:user_" json:"user"`
 	LocationMaker     `gorm:"embedded;embeddedPrefix:posts_locations_" json:"location"`
 	Insights.Insights `gorm:"embedded;embeddedPrefix:insights_" json:"insights"`
+	User.LikesPosts   `gorm:"embedded;embeddedPrefix:likes_posts_" json:"likes"`
 }
 
 type LocationMaker struct {

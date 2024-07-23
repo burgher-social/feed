@@ -11,5 +11,6 @@ func RegisterRouters() http.Handler {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/insights/like/add", Utils.AuthHandler(likeHandler)).Methods("POST")
+	r.HandleFunc("/insights/like/subtract", Utils.AuthHandler(likeHandler)).Methods("POST")
 	return r
 }

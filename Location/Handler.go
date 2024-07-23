@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +14,6 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userId := ctx.Value(Utils.ContextUserKey)
 	locationReq.UserId = userId.(string)
-	fmt.Println(locationReq)
 	if err != nil {
 		// return HTTP 400 bad request
 		w.WriteHeader(400)
@@ -26,6 +26,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		Latitude:  locationReq.Latitude,
 		Longitude: locationReq.Longitude,
 		City:      locationReq.City,
+		Timestamp: time.Now().UnixNano() / 1e6,
 	}
 	loc, err := create(location)
 	if err != nil {
