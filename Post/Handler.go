@@ -30,7 +30,8 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(PostResponse{Id: posts.Id, ParentId: posts.ParentId, Content: posts.Content, UserId: posts.UserId})
+	resp := PostResponse{Id: posts.Id, ParentId: posts.ParentId, Content: posts.Content, UserId: posts.UserId}
+	json.NewEncoder(w).Encode(resp)
 }
 
 func readHandler(w http.ResponseWriter, r *http.Request) {

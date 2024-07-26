@@ -19,7 +19,7 @@ func Connect() *gorm.DB {
 		port := os.Getenv("DB_PORT")
 		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Kolkata", host, user, password, dbname, port)
 		// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		// Logger: logger.Default.LogMode(logger.Info),
+		// 	Logger: logger.Default.LogMode(logger.Info),
 		// })
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err != nil {

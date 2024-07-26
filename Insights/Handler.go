@@ -15,6 +15,7 @@ func likeHandler(w http.ResponseWriter, r *http.Request) {
 	var likeReq LikeRequest
 	err := json.NewDecoder(r.Body).Decode(&likeReq)
 	userId := r.Context().Value(Utils.ContextUserKey).(string)
+	fmt.Printf("%+v\n", likeReq)
 	// fmt.Println(locationReq)
 	if err != nil {
 		// return HTTP 400 bad request

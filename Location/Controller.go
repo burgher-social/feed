@@ -13,14 +13,14 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-var locationUpdateThreshold int64 = 1 * 60
+var locationUpdateThreshold int64 = 1 * 60 * 1000
 
 func create(location Location) (Location, error) {
 	if loc, err := Read(location.UserId); err == nil {
 		now := time.Now().UnixNano() / 1e6
 
 		// Don't update location and posts with that location if time diff is very less
-		if loc.Timestamp != 0 && loc.Timestamp-now < locationUpdateThreshold {
+		if loc.Timestamp != 0 && now-loc.Timestamp < locationUpdateThreshold {
 			return location, nil
 		}
 		if posts, perr := Post.Read(loc.UserId, location.UserId); perr == nil {

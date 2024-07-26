@@ -10,7 +10,10 @@ import (
 )
 
 func Like(count int, postId string, authUserId string) error {
-	var userLike User.LikesPosts
+	userLike := User.LikesPosts{
+		UserId: authUserId,
+		PostId: postId,
+	}
 	DB.Connect().Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "user_id"}, {Name: "post_id"}},
 		DoNothing: true,
@@ -26,7 +29,7 @@ func UnLike(count int, postId string, authUserId string) error {
 		PostId: postId,
 	}
 	DB.Connect().Unscoped().Where("user_id = ? AND post_id = ?", userLike.UserId, userLike.PostId).Delete(&userLike)
-	sqlStr := fmt.Sprintf("UPDATE insights SET likes = likes - %d where post_id = '%s'", count, postId)
+	sqlStr := fmt.Sprintf("UPDATE insights SET likes = likes + %d where post_id = '%s'", count, postId)
 	DB.Connect().Exec(sqlStr)
 	return nil
 }

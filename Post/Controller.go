@@ -61,6 +61,7 @@ func ReadOne(postId string, authUserId string) (PostInfo, error) {
 	if len(res) == 0 {
 		return PostInfo{}, fmt.Errorf("no post found")
 	}
+
 	return res[0], nil
 }
 
