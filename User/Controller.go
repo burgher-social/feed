@@ -27,9 +27,6 @@ func create(user User, firebaseAuthIdToken string) (User, *string, *string, erro
 		tempPicture := (*claims)["picture"].(string)
 		user.ImageUrl = &tempPicture
 	}
-	var existingUser User
-	DB.Connect().Where("email = ?", user.Email).Scan(&existingUser)
-	fmt.Println(existingUser)
 	DB.Connect().Create(&user)
 	accessToken, refreshToken := Token.GenerateTokens(user.Id)
 	return user, &accessToken, &refreshToken, nil

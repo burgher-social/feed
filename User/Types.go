@@ -13,7 +13,7 @@ type User struct {
 	UserName   string `json:"username"`
 	Tag        int
 	IsVerified bool
-	Email      string
+	Email      string  `gorm:"unique;not null"`
 	ImageUrl   *string `json:"imageUrl"`
 }
 
