@@ -2,6 +2,7 @@ package Utils
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -29,16 +30,13 @@ func initFirebase() (*firebase.App, error) {
 	}
 	fmt.Println("Successfully Opened sdkfile.json")
 
-	// defer the closing of our jsonFile so that we can parse it later on
-	// defer jsonFile.Close()
-	// b, _ := jsonFile.Read()
 	if err := json.Unmarshal(jsonFile, &firebaseconfig); err != nil {
 		log.Fatal(err)
 	}
 	var re = regexp.MustCompile(`/\\n/g`)
-	// fmt.Println(os.Getenv("FIREBASE_PVT_KEY"))
-	firebasepvtkey := re.ReplaceAllString(os.Getenv("FIREBASE_PVT_KEY"), `\n`)
-	// fmt.Println(firebasepvtkey)
+	pvtKey, _ := base64.StdEncoding.DecodeString(os.Getenv("FIREBASE_PVT_KEY_B64"))
+	pvtKeyStr := string(pvtKey)
+	firebasepvtkey := re.ReplaceAllString(pvtKeyStr, `\n`)
 	firebasepvtkey = strings.Replace(firebasepvtkey, `\n`, "\n", -1)
 	firebaseconfig["private_key_id"] = os.Getenv("FIREBASE_PVT_KEY_ID")
 	firebaseconfig["private_key"] = firebasepvtkey
