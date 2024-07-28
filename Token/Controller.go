@@ -1,12 +1,14 @@
 package Token
 
 import (
+	DB "burgher/Storage/PSQL"
 	"encoding/json"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/gorm"
 )
 
 var secretKey = []byte(string(os.Getenv("JWT_SIGNING")))
@@ -17,7 +19,23 @@ func TokenRefresh(refreshToken string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-
+	type User struct {
+		gorm.Model
+		Id         string
+		Name       string
+		UserName   string `json:"username"`
+		Tag        int
+		IsVerified bool
+		Email      string  `gorm:"unique;not null"`
+		ImageUrl   *string `json:"imageUrl"`
+	}
+	var user User
+	DB.Connect().Where("user_id = ?", tokn.UserId).First(&user)
+	fmt.Println("REFRESH TOKEN REQUESTING USER")
+	fmt.Println(user)
+	if user.Id == "" {
+		return "", "", fmt.Errorf("user doesn't exist")
+	}
 	accessToken, refreshTokenNew := GenerateTokens(tokn.UserId)
 	return accessToken, refreshTokenNew, nil
 }

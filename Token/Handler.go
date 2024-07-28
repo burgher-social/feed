@@ -22,8 +22,8 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 	tokenResponse, err2 := getNewToken(readRequest.RefreshToken)
 	if err2 != nil {
 		// return HTTP 400 bad request
-		w.WriteHeader(400)
-		w.Write([]byte(err.Error()))
+		w.WriteHeader(401)
+		w.Write([]byte(err2.Error()))
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
