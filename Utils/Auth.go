@@ -3,7 +3,6 @@ package Utils
 import (
 	"burgher/Token"
 	"context"
-	"fmt"
 	"net/http"
 )
 
@@ -24,8 +23,6 @@ func AuthHandler(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		claims, err := Token.GetTokenClaims(authHeader)
-		fmt.Println("TOKEN claims")
-		fmt.Println(claims)
 		if err != nil {
 			w.WriteHeader(401)
 			w.Write([]byte("Unautorized"))
