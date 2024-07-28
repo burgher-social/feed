@@ -19,6 +19,9 @@ var fields = `posts.*,
 		`
 
 func create(post Post, topics []string) (Post, error) {
+	if len(post.Content) > 300 {
+		return post, fmt.Errorf("content length too long")
+	}
 	var posttoppics = []PostTopics{}
 	for _, x := range topics {
 		posttoppics = append(posttoppics, PostTopics{PostId: post.Id, TopicId: x})
